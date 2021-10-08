@@ -1,8 +1,6 @@
-# converting data types
+# converting data types, forms
 from rest_framework import serializers
 from .models import CustomUser
-
-#class ResetPasswordSerializer(serializers.ModelSerializer):
 
 
 class RegistrationSerializer(serializers.ModelSerializer):

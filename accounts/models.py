@@ -5,9 +5,7 @@ from django.db import models
 from django.contrib.auth.models import (
     AbstractUser, PermissionsMixin
 )
-
-
-# from rest_framework_simplejwt.authentication import
+# from rest_framework_simplejwt.authentication import TODO: ASK ARMEN
 from accounts.managers import CustomUserManager
 
 
