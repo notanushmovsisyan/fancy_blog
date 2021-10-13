@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'accounts',
     'rest_framework_simplejwt',
-    'django_rest_passwordreset',
 ]
 
 MIDDLEWARE = [
@@ -133,11 +132,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField' # defaulti mej dnem?
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.mailtrap.io'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = '2525'
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
         'rest_framework.permissions.AllowAny',
-
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
@@ -184,9 +189,3 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
-
-OAUTH2_PROVIDER = {
-        'ACCESS_TOKEN_EXPIRE_SECONDS': 60 * 15,
-        'OAUTH_SINGLE_ACCESS_TOKEN': True,
-        'OAUTH_DELETE_EXPIRED': True
- }
