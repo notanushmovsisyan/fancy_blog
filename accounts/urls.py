@@ -1,11 +1,9 @@
-from django.conf.urls.static import static
 from django.urls import path
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
 import accounts.views as views
-from system import settings
 
 urlpatterns = [
     path('login/', TokenObtainPairView.as_view(), name='login'),
