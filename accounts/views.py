@@ -1,29 +1,27 @@
-# functionner, HTTP response, url
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from rest_framework import generics, status
+from rest_framework import generics
 from rest_framework.response import Response
+from . import serializers
 from .models import CustomUser
-from .serializers import RegistrationSerializer, ResetPasswordEmailSerializer, VerifyTokenAndChangePasswordSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.core.mail.backends.smtp import EmailBackend
 from django.contrib.auth.tokens import default_token_generator
-from django.core import mail
 from accounts.mail_service import send_mail
 
 
 class RegistrationView(generics.CreateAPIView):
-    serializer_class = RegistrationSerializer
+    serializer_class = serializers.RegistrationSerializer
     permission_classes = (AllowAny,)
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return Response({"message": "Registration was successfully completed."})
+        user = serializer.save()
+        return user
 
 
-class ResetPasswordEmail(generics.CreateAPIView):
-    serializer_class = ResetPasswordEmailSerializer
+class ResetPasswordEmailView(generics.CreateAPIView):
+    serializer_class = serializers.ResetPasswordEmailSerializer
     permission_classes = (AllowAny,)
 
     def post(self, request, *args, **kwargs):
@@ -35,22 +33,43 @@ class ResetPasswordEmail(generics.CreateAPIView):
             return response
 
         user = CustomUser.objects.get(email=serializer.data['email'])
-        token = default_token_generator.make_token(user=user)
+        token = default_token_generator.make_token(user=user.id)
         uidb64 = urlsafe_base64_encode(force_bytes(user.id))
-        send_mail(self, token, uidb64, serializer.data['email'])
-
+        send_mail(token, uidb64, serializer.data['email'])
         return response
 
 
-class VerifyTokenAndChangePassword(generics.CreateAPIView):
-    serializer_class = VerifyTokenAndChangePasswordSerializer
-    permission_classes = [AllowAny]
+class ResetPasswordView(generics.CreateAPIView):  # TODO: HERE
+    serializer_class = serializers.ResetPasswordSerializer
+    permission_classes = (AllowAny,)
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = CustomUser.objects.get(id=serializer.data['user_id'])
-        user.set_password(serializer.data['newPassword'])
-        response = "Password has been successfully."
+        user.set_password(serializer.data['new_password'])
+        response = "Password has been set successfully."
 
         return Response({"message": response})
+
+
+class ChangePasswordView(generics.CreateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = serializers.ChangePasswordSerializer
+    permission_classes = (IsAuthenticated, )
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, context={'user': request.user})
+        serializer.is_valid(raise_exception=True)
+        request.user.set_password(serializer.data['password'])
+        request.user.save()
+        return Response({"message": "Password has been set successfully."})
+
+
+class ProfilePictureUploadView(generics.CreateAPIView):
+    serializer_class = serializers.ProfilePictureUploadSerializer
+    permission_classes = (IsAuthenticated, )
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)

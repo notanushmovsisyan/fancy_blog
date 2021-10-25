@@ -9,6 +9,9 @@ djangorestframework = "*"
 django-environ = "*"
 psycopg2 = "*"
 serial = "*"
+span = "*"
+pandas = "*"
+pybase64 = "*"
 
 [dev-packages]
 
