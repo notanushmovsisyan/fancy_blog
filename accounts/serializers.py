@@ -1,4 +1,3 @@
-# converting data types, forms
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import serializers
@@ -75,14 +74,19 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data['password'] != data['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
-        if not self.context['user'].check_password(data['old_password']):  # TODO: AttributeError: 'set' object has no attribute 'user'
+        if not self.context['user'].check_password(data['old_password']):
             raise ValidationError({"old_password": "Old password is not correct"})
         return data
 
 
 class ProfilePictureUploadSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField(upload_to='profile_pics')
+    image = serializers.ImageField(use_url=True)
+    email = serializers.EmailField(read_only=True)
+    first_name = serializers.CharField(read_only=True)
+    last_name = serializers.CharField(read_only=True)
+    phone_number = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ('image', )
+        fields = ('image', 'email', 'first_name', 'last_name', 'phone_number')
+        read_only_fields = ('email', 'first_name', 'last_name', 'phone_number')

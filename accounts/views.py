@@ -1,6 +1,6 @@
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.response import Response
 from . import serializers
 from .models import CustomUser
@@ -39,7 +39,7 @@ class ResetPasswordEmailView(generics.CreateAPIView):
         return response
 
 
-class ResetPasswordView(generics.CreateAPIView):  # TODO: HERE
+class ResetPasswordView(generics.CreateAPIView):
     serializer_class = serializers.ResetPasswordSerializer
     permission_classes = (AllowAny,)
 
@@ -71,5 +71,7 @@ class ProfilePictureUploadView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, )
 
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, instance=request.user)
         serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
